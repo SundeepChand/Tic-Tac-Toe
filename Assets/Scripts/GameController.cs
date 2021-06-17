@@ -6,12 +6,17 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour
 {
     public Text[] buttonList;
+    public GameObject gameOverPanel;
+    public Text gameOverText;
 
     private string playerSide;
+    private int movesCount;
 
     void Awake()
     {
         playerSide = "X";
+        movesCount = 0;
+        gameOverPanel.SetActive(false);
         SetGameReferenceOnButtonsController();
     }
 
@@ -22,6 +27,8 @@ public class GameController : MonoBehaviour
 
     public void EndTurn()
     {
+        movesCount++;
+
         // Check winning conditions
         // Rows
         if (buttonList[0].text == playerSide && buttonList[1].text == playerSide && buttonList[2].text == playerSide)
@@ -59,6 +66,11 @@ public class GameController : MonoBehaviour
             GameOver();
         }
 
+        if (movesCount >= 9)
+        {
+            SetGameOverText("It's a draw!");
+        }
+
         // Change sides
         ChangeSides();
     }
@@ -69,11 +81,19 @@ public class GameController : MonoBehaviour
         {
             buttonList[i].GetComponentInParent<Button>().interactable = false;
         }
+
+        SetGameOverText(playerSide + " Wins!");
     }
 
     public string GetPlayerSide()
     {
         return playerSide;
+    }
+
+    void SetGameOverText(string text)
+    {
+        gameOverPanel.SetActive(true);
+        gameOverText.text = text;
     }
 
     void SetGameReferenceOnButtonsController()

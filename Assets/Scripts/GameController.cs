@@ -36,12 +36,8 @@ public class GameController : MonoBehaviour
 
     void Awake()
     {
-        movesCount = 0;
-        gameStartPanel.SetActive(true);
-        gameOverPanel.SetActive(false);
-        restartButton.SetActive(false);
         SetGameReferenceOnButtonsController();
-        SetBoardInteractable(false);
+        InitGame();
     }
 
     void ChangeSides()
@@ -127,6 +123,15 @@ public class GameController : MonoBehaviour
     public string GetPlayerSide()
     {
         return playerSide;
+    }
+
+    void InitGame()
+    {
+        movesCount = 0;
+        gameStartPanel.SetActive(true);
+        gameOverPanel.SetActive(false);
+        restartButton.SetActive(false);
+        SetBoardInteractable(false);
     }
 
     void ResetPlayerColors()

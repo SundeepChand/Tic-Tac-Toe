@@ -31,6 +31,8 @@ public class GameController : MonoBehaviour
     public PlayerColor activePlayerColor;
     public PlayerColor inactivePlayerColor;
 
+    private string player1Side;  // Player1 is the human in AI Game
+    private string player2Side;  // Player2 is the computer in AI Game
     private string playerSide;
     private int movesCount;
 
@@ -38,6 +40,80 @@ public class GameController : MonoBehaviour
     {
         SetGameReferenceOnButtonsController();
         InitGame();
+    }
+
+    void PlayAIMove()
+    {
+        // Random selector AI
+        /*do
+        {
+            index = Random.Range(0, buttonList.Length);
+        } while (buttonList[index].text != "");*/
+
+        // Mini-Max Selector
+        // AI player is the maximizer here
+        int index = GetMiniMaxScore(true).x;
+        Debug.Log(index);
+        buttonList[index].GetComponentInParent<GridSpace>().SetSpace();
+    }
+
+    Vector2Int GetMiniMaxScore(bool maximizer)
+    {
+        // Base Case
+        if (movesCount >= 9)
+        {
+            return new Vector2Int(-1, 0);
+        }
+        else if (IsWin(player2Side))
+        {
+            return new Vector2Int(-1, 1);
+        }
+        else if (IsWin(player1Side))
+        {
+            return new Vector2Int(-1, -1);
+        }
+
+        Vector2Int score = new Vector2Int(-1, -1);
+        if (maximizer)
+        {
+            score.y = -1;
+        }
+        else
+        {
+            score.y = 1;
+        }
+        for (int i = 0; i < buttonList.Length; i++)
+        {
+            if (buttonList[i].text == "")
+            {
+                if (maximizer)
+                {
+                    buttonList[i].text = player2Side;
+                }
+                else
+                {
+                    buttonList[i].text = player1Side;
+                }
+                movesCount++;
+
+                Vector2Int tempScore = GetMiniMaxScore(!maximizer);
+
+                if (maximizer && tempScore.y > score.y)
+                {
+                    score.y = tempScore.y;
+                    score.x = i;
+                }
+                else if (!maximizer && tempScore.y < score.y)
+                {
+                    score.y = tempScore.y;
+                    score.x = -1;
+                }
+
+                buttonList[i].text = "";
+                movesCount--;
+            }
+        }
+        return score;
     }
 
     void ChangeSides()
@@ -51,45 +127,19 @@ public class GameController : MonoBehaviour
         {
             SetPlayerColors(playerO, playerX);
         }
+
+        bool shouldAIPlay = (playerSide == player2Side);
+        if (shouldAIPlay)
+        {
+            PlayAIMove();
+        }
     }
 
     public void EndTurn()
     {
         movesCount++;
 
-        // Check winning conditions
-        // Rows
-        if (buttonList[0].text == playerSide && buttonList[1].text == playerSide && buttonList[2].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        else if (buttonList[3].text == playerSide && buttonList[4].text == playerSide && buttonList[5].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        else if (buttonList[6].text == playerSide && buttonList[7].text == playerSide && buttonList[8].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        // Columns
-        else if (buttonList[0].text == playerSide && buttonList[3].text == playerSide && buttonList[6].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        else if (buttonList[1].text == playerSide && buttonList[4].text == playerSide && buttonList[7].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        else if (buttonList[2].text == playerSide && buttonList[5].text == playerSide && buttonList[8].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        // Diagonals
-        else if (buttonList[0].text == playerSide && buttonList[4].text == playerSide && buttonList[8].text == playerSide)
-        {
-            GameOver(playerSide);
-        }
-        else if (buttonList[6].text == playerSide && buttonList[4].text == playerSide && buttonList[2].text == playerSide)
+        if (IsWin(playerSide))
         {
             GameOver(playerSide);
         }
@@ -132,6 +182,47 @@ public class GameController : MonoBehaviour
         gameOverPanel.SetActive(false);
         restartButton.SetActive(false);
         SetBoardInteractable(false);
+    }
+
+    private bool IsWin(string player)
+    {
+        // Check winning conditions
+        // Rows
+        if (buttonList[0].text == player && buttonList[1].text == player && buttonList[2].text == player)
+        {
+            return true;
+        }
+        else if (buttonList[3].text == player && buttonList[4].text == player && buttonList[5].text == player)
+        {
+            return true;
+        }
+        else if (buttonList[6].text == player && buttonList[7].text == player && buttonList[8].text == player)
+        {
+            return true;
+        }
+        // Columns
+        else if (buttonList[0].text == player && buttonList[3].text == player && buttonList[6].text == player)
+        {
+            return true;
+        }
+        else if (buttonList[1].text == player && buttonList[4].text == player && buttonList[7].text == player)
+        {
+            return true;
+        }
+        else if (buttonList[2].text == player && buttonList[5].text == player && buttonList[8].text == player)
+        {
+            return true;
+        }
+        // Diagonals
+        else if (buttonList[0].text == player && buttonList[4].text == player && buttonList[8].text == player)
+        {
+            return true;
+        }
+        else if (buttonList[6].text == player && buttonList[4].text == player && buttonList[2].text == player)
+        {
+            return true;
+        }
+        return false;
     }
 
     void ResetPlayerColors()
@@ -196,14 +287,16 @@ public class GameController : MonoBehaviour
 
     public void SetStartingSide(string startingSide)
     {
-        playerSide = startingSide;
+        player1Side = playerSide = startingSide;
         if (playerSide == "X")
         {
             SetPlayerColors(playerX, playerO);
+            player2Side = "O";
         }
         else
         {
             SetPlayerColors(playerO, playerX);
+            player2Side = "X";
         }
         SetPlayerButtons(false);
         StartGame();

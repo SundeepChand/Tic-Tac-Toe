@@ -8,3 +8,7 @@ Key features:
 
 1. Uses only the UI features of Unity.
 2. GameAI Implemented using Minimax Algorithm.
+
+## Gameplay
+
+![Gameplay.gif](./img/game.gif)
